@@ -10,7 +10,8 @@ include_directories(${X11_X11_INCLUDE_PATH})
 add_library(${PLUGIN_NAME} SHARED
   "${PLUGIN_NAME}.cc"
   gtk_bridge.cpp
-)
+  dart_ffi.cpp
+  library.def)
 
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES

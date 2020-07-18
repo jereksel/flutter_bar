@@ -4,7 +4,7 @@ import 'package:flutter_bar_plugin/bar_settings.dart';
 import 'package:flutter_bar_plugin/monitor.dart';
 
 class MonitorListWidget extends StatelessWidget {
-  final List<Monitor> monitors = BarSettings().monitors;
+  final List<Monitor> _monitors = BarSettings().monitors;
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +13,8 @@ class MonitorListWidget extends StatelessWidget {
       builder: (BuildContext context, String monitorName, Widget child) {
         return Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            for (var monitor in monitors)
+          children: [
+            for (var monitor in _monitors)
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

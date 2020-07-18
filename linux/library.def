@@ -1,0 +1,3 @@
+LIBRARY   libflutter_bar_plugin_plugin
+EXPORTS
+   hello_world

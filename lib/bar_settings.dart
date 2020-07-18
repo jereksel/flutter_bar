@@ -38,7 +38,7 @@ class BarSettings {
     final monitor =
         monitors.where((element) => element.name == monitorN).toList();
     if (monitor.isEmpty) {
-      print("Cannot find monitor with name $monitorN");
+      print("Cannot find monitor with name '$monitorN'");
       return;
     }
 

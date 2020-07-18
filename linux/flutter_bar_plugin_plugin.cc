@@ -6,6 +6,7 @@
 #include <string>
 #include <array>
 #include "gtk_bridge.h"
+#include "util.h"
 
 #define FLUTTER_BAR_PLUGIN(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), flutter_bar_plugin_get_type(), \

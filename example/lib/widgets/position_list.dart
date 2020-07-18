@@ -16,8 +16,8 @@ class PositionListWidget extends StatelessWidget {
       builder: (BuildContext context, Position currentPosition, Widget child) {
         return Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            for (var item in _positionNames.entries)
+          children: [
+            for (final item in _positionNames.entries)
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
