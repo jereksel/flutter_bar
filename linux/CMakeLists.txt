@@ -3,7 +3,7 @@ set(PROJECT_NAME "flutter_bar_plugin")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 set(PLUGIN_NAME "${PROJECT_NAME}_plugin")
-
+set(CMAKE_CXX_STANDARD 17)
 find_package(X11 REQUIRED)
 include_directories(${X11_X11_INCLUDE_PATH})
 
@@ -11,6 +11,8 @@ add_library(${PLUGIN_NAME} SHARED
   "${PLUGIN_NAME}.cc"
   gtk_bridge.cpp
   dart_ffi.cpp
+  x11_events.cpp
+  util.cpp
   library.def)
 
 apply_standard_settings(${PLUGIN_NAME})

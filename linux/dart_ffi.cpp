@@ -4,19 +4,27 @@
 
 extern "C" {
 
-    struct RamInfo {
-        u_int64_t totalRam;
-        u_int64_t freeRam;
-    };
+struct RamInfo {
+    u_int64_t totalRam;
+    u_int64_t freeRam;
+};
 
-    EXPORT RamInfo* hello_world() {
-        struct sysinfo memInfo{};
+EXPORT RamInfo *hello_world() {
+    struct sysinfo memInfo{};
 
-        sysinfo (&memInfo);
+    sysinfo (&memInfo);
 
-        auto ram_info = new RamInfo{memInfo.totalram, memInfo.freeram + memInfo.bufferram + memInfo.sharedram};
+    auto ram_info = new RamInfo{memInfo.totalram, memInfo.freeram + memInfo.bufferram + memInfo.sharedram};
 
-        return ram_info;
+    return ram_info;
 
-    }
+}
+
+EXPORT int32_t foo(
+        int32_t bar,
+        int32_t (*callback)(void *, int32_t)
+) {
+    return callback(nullptr, bar);
+}
+
 }

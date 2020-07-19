@@ -1,3 +1,5 @@
 LIBRARY   libflutter_bar_plugin_plugin
 EXPORTS
    hello_world
+   create_current_desktop_listener
+   get_current_desktop

@@ -3,11 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_bar_plugin/CAPI.dart';
+import 'package:flutter_bar_plugin/X11.dart';
 import 'package:flutter_bar_plugin/bar_settings.dart';
 import 'package:flutter_bar_plugin/flutter_bar_plugin.dart';
+import 'package:flutter_bar_plugin_example/widgets/current_desktop.dart';
 import 'package:get_it/get_it.dart';
 
 import 'widgets/date.dart';
+import 'widgets/desktop_names.dart';
 import 'widgets/mem_info.dart';
 import 'widgets/monitor_list.dart';
 import 'widgets/position_list.dart';
@@ -32,6 +36,11 @@ void main0({@required String monitorName}) async {
   final fl = FontLoader("abc");
   fl.addFont(f);
   await fl.load();
+
+//  final stream = await prepareX11EventListener();
+
+//  print(await stream.first);
+
 
   runApp(MyApp());
 }
@@ -60,6 +69,8 @@ class MyApp extends StatelessWidget {
                       fontSize: 86.0,
                       color: Colors.red,
                       fontFamily: "abc")),
+              CurrentDesktopWidget(),
+              DesktopNamesWidget(),
             ],
           ),
         ),
