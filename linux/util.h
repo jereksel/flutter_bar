@@ -12,6 +12,12 @@ struct list_of_strings {
     char** data;
 };
 
-list_of_strings* create(std::vector<std::string>& vec);
+struct list_of_ints {
+    uint64_t length;
+    uint32_t* data;
+};
+
+list_of_strings* create(const std::vector<std::string>& vec);
+list_of_ints* create(const std::vector<uint32_t>& vec);
 
 #endif //RUNNER_UTIL_H

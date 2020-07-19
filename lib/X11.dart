@@ -1,56 +1,91 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'package:collection/collection.dart';
 
-import 'CAPI.dart';
+import 'X11Properties.dart';
 
-Future<Stream<int>> prepareCurrentDesktopListener() async {
+enum PropertyType {
+  INT,
+  STRING_LIST,
+  INT_LIST,
+}
+
+class IsolatePackage {
+  SendPort sendPort;
+  PropertyType propertyType;
+  String atomName;
+}
+
+Stream<List<String>> prepareDesktopNamesListener() {
+  return getStringListPropertyStream("_NET_DESKTOP_NAMES");
+}
+
+Stream<int> prepareCurrentDesktopListener() {
+  return getIntPropertyStream("_NET_CURRENT_DESKTOP");
+}
+
+Stream<List<int>> getVisibleDesktops() {
+  return getIntListPropertyStream("_FLUTTERBAR_VISIBLE_WORKSPACES");
+}
+
+Stream<int> getNumberOfDesktops() {
+  return getIntPropertyStream("_NET_NUMBER_OF_DESKTOPS");
+}
+
+Stream<int> getIntPropertyStream(String atomName) {
+  return getPropertyStream<int>(PropertyType.INT, atomName).distinct();
+}
+
+Stream<List<String>> getStringListPropertyStream(
+    String atomName) {
+  return getPropertyStream<List<String>>(PropertyType.STRING_LIST, atomName)
+      .distinct(ListEquality().equals);
+}
+
+Stream<List<int>> getIntListPropertyStream(String atomName) {
+  return getPropertyStream<List<int>>(PropertyType.INT_LIST, atomName)
+      .distinct(ListEquality().equals);
+}
+
+Stream<T> getPropertyStream<T>(PropertyType type, String atomName) async* {
 
   ReceivePort isolateToMainStream = ReceivePort();
 
-  final s = StreamController<int>();
+  // ignore: close_sinks
+  final s = StreamController<T>();
 
   isolateToMainStream.listen((message) {
     s.add(message);
   });
 
-  await Isolate.spawn(_currentDesktopEntryPoint, isolateToMainStream.sendPort);
+  final package = IsolatePackage();
+  package.sendPort = isolateToMainStream.sendPort;
+  package.propertyType = type;
+  package.atomName = atomName;
 
-  return s.stream.distinct();
+  await Isolate.spawn(_currentDesktopEntryPoint, package);
+
+  yield* s.stream;
 
 }
 
-void _currentDesktopEntryPoint(SendPort sendPort) {
+void _currentDesktopEntryPoint(IsolatePackage isolatePackage) {
+  final sendPort = isolatePackage.sendPort;
+  final propertyListener = create(isolatePackage.propertyType, isolatePackage.atomName);
 
-  final event_provider = X11CurrentDesktopListener();
-
-  while(true) {
-    sendPort.send(event_provider.getCurrentDesktop());
+  while (true) {
+    sendPort.send(propertyListener.getPropertyValue());
   }
-
 }
 
-Future<Stream<List<String>>> prepareDesktopNamesListener() async {
-
-  ReceivePort isolateToMainStream = ReceivePort();
-
-  final s = StreamController<List<String>>();
-
-  isolateToMainStream.listen((message) {
-    s.add(message);
-  });
-
-  await Isolate.spawn(_desktopNamesEntryPoint, isolateToMainStream.sendPort);
-
-  return s.stream.distinct();
-
-}
-
-void _desktopNamesEntryPoint(SendPort sendPort) {
-
-  final event_provider = X11DesktopListListener();
-
-  while(true) {
-    sendPort.send(event_provider.getDesktopNames());
+PropertyListener create(PropertyType type, String atomName) {
+  switch (type) {
+    case PropertyType.INT:
+      return CardinalPropertyListener(atomName);
+    case PropertyType.STRING_LIST:
+      return StringArrayPropertyListener(atomName);
+    case PropertyType.INT_LIST:
+      return IntegerArrayPropertyListener(atomName);
   }
-
+  throw Exception("Invalid property type: $type");
 }

@@ -4,9 +4,7 @@
  */
 
 #include <xcb/xcb.h>
-#include <malloc.h>
 #include <cstring>
-#include <memory>
 #include <sstream>
 #include <vector>
 #include <iostream>
@@ -32,12 +30,12 @@ static xcb_atom_t intern_atom(xcb_connection_t *conn, const char *atom) {
     return result;
 }
 
-template<const char *ATOM_NAME, class ATOM_TYPE>
+template<class ATOM_TYPE>
 class AbstractX11EventsListener {
 
 public:
 
-    AbstractX11EventsListener() {
+    explicit AbstractX11EventsListener(const std::string &atom_name) {
         conn = xcb_connect(nullptr, nullptr);
         if (xcb_connection_has_error(conn)) {
             throw std::runtime_error("Cannot open daemon connection.");
@@ -55,10 +53,10 @@ public:
         );
 
 
-        current_desktop_atom = intern_atom(conn, ATOM_NAME);
+        current_desktop_atom = intern_atom(conn, atom_name.data());
         if (current_desktop_atom == XCB_NONE) {
             std::stringstream ss;
-            ss << "Cannot get " << ATOM_NAME << "atom";
+            ss << "Cannot get " << atom_name << "atom";
             throw std::runtime_error(ss.str());
         }
 
@@ -67,6 +65,10 @@ public:
     }
 
     ATOM_TYPE getEvent() {
+        if (first) {
+            first = false;
+            return getAtom();
+        }
         xcb_generic_event_t *ev;
         while ((ev = xcb_wait_for_event(conn))) {
             if (ev->response_type == XCB_PROPERTY_NOTIFY) {
@@ -90,10 +92,14 @@ protected:
 
     virtual ATOM_TYPE getAtom() = 0;
 
+private:
+    bool first = true;
+
 };
 
-template<const char *ATOM_NAME>
-class CardinalX11EventsListener : public AbstractX11EventsListener<ATOM_NAME, uint32_t> {
+class CardinalX11EventsListener : public AbstractX11EventsListener<uint32_t> {
+
+    using AbstractX11EventsListener::AbstractX11EventsListener;
 
 protected:
 
@@ -111,7 +117,7 @@ protected:
 
         cookie = xcb_get_property(conn, 0, window, property, type, 0, UINT32_MAX);
         if ((reply = xcb_get_property_reply(conn, cookie, nullptr))) {
-            auto current_desktop = *reinterpret_cast<uint32_t *>(xcb_get_property_value(reply));
+            auto current_desktop = reinterpret_cast<uint32_t *>(xcb_get_property_value(reply))[0];
             delete reply;
             return current_desktop;
         }
@@ -120,8 +126,9 @@ protected:
 
 };
 
-template<const char *ATOM_NAME>
-class StringArrayX11EventsListener : public AbstractX11EventsListener<ATOM_NAME, std::vector<std::string>> {
+class StringArrayX11EventsListener : public AbstractX11EventsListener<std::vector<std::string>> {
+
+    using AbstractX11EventsListener::AbstractX11EventsListener;
 
 protected:
 
@@ -137,21 +144,12 @@ protected:
         xcb_atom_t property = current_desktop_atom;
         xcb_atom_t type = intern_atom(conn, "UTF8_STRING");
 
-        cookie = xcb_get_property(conn, 0, window, property, type, 0, 8);
+        cookie = xcb_get_property(conn, 0, window, property, type, 0, UINT32_MAX);
         if ((reply = xcb_get_property_reply(conn, cookie, nullptr))) {
             int len = xcb_get_property_value_length(reply);
             auto char_arr = reinterpret_cast<char *>(xcb_get_property_value(reply));
-
             auto data = std::string(char_arr, len);
-
             auto desktops = splitString(data, '\x00');
-
-            std::cout << "[" << std::endl;
-            for (const auto &desktop : desktops) {
-                std::cout << desktop << std::endl;
-            }
-            std::cout << "]" << std::endl;
-
             return desktops;
         }
         throw std::runtime_error("Cannot get reply");
@@ -159,34 +157,66 @@ protected:
 
 };
 
-constexpr char NET_CURRENT_DESKTOP[] = "_NET_CURRENT_DESKTOP";
-constexpr char NET_DESKTOP_NAMES[] = "_NET_DESKTOP_NAMES";
-constexpr char NET_NUMBER_OF_DESKTOPS[] = "__NET_NUMBER_OF_DESKTOPS";
+class IntArrayX11EventsListener : public AbstractX11EventsListener<std::vector<uint32_t>> {
 
-using CurrentDesktopEventsListener = CardinalX11EventsListener<NET_CURRENT_DESKTOP>;
-using NumberOfDesktopsEventsListener = CardinalX11EventsListener<NET_NUMBER_OF_DESKTOPS>;
+    using AbstractX11EventsListener::AbstractX11EventsListener;
 
-using DesktopNamesEventsListener = StringArrayX11EventsListener<NET_DESKTOP_NAMES>;
+protected:
+
+    std::vector<uint32_t> getAtom() override {
+        xcb_get_property_cookie_t cookie;
+        xcb_get_property_reply_t *reply;
+
+        auto conn = this->conn;
+        auto current_desktop_atom = this->current_desktop_atom;
+        auto window = this->window;
+
+        /* These atoms are predefined in the X11 protocol. */
+        xcb_atom_t property = current_desktop_atom;
+        xcb_atom_t type = XCB_ATOM_CARDINAL;
+
+        cookie = xcb_get_property(conn, 0, window, property, type, 0, UINT32_MAX);
+        if ((reply = xcb_get_property_reply(conn, cookie, nullptr))) {
+            int len = (xcb_get_property_value_length(reply) / 4);
+            auto int_arr = reinterpret_cast<uint32_t *>(xcb_get_property_value(reply));
+            auto vec = std::vector<uint32_t>(len);
+            for (int i = 0; i < len; i++) {
+                vec[i] = int_arr[i];
+            }
+            return vec;
+        }
+        throw std::runtime_error("Cannot get reply");
+    }
+
+};
+
 
 extern "C" {
 
-EXPORT void *create_current_desktop_listener() {
-    return new CurrentDesktopEventsListener();
+EXPORT void *create_cardinal_property_listener(const char *atom_name) {
+    return new CardinalX11EventsListener(atom_name);
 }
 
-EXPORT uint32_t get_current_desktop(void *p) {
-    auto listener = static_cast<CurrentDesktopEventsListener *>(p);
-    return listener->getEvent();
+EXPORT uint32_t get_cardinal_property(void *p) {
+    return static_cast<CardinalX11EventsListener *>(p)->getEvent();
 }
 
-EXPORT void* create_desktop_names_listener() {
-    return new DesktopNamesEventsListener();
+EXPORT void *create_string_list_property_listener(const char *atom_name) {
+    return new StringArrayX11EventsListener(atom_name);
 }
 
-EXPORT list_of_strings* get_desktop_names(void *p) {
-    auto listener = static_cast<DesktopNamesEventsListener *>(p);
-    auto desktops = listener->getEvent();
-    return create(desktops);
+EXPORT list_of_strings *get_string_list_property(void *p) {
+    auto property = static_cast<StringArrayX11EventsListener *>(p)->getEvent();
+    return create(property);
+}
+
+EXPORT void *create_integer_list_property_listener(const char *atom_name) {
+    return new IntArrayX11EventsListener(atom_name);
+}
+
+EXPORT list_of_ints *get_integer_list_property(void *p) {
+    auto property = static_cast<IntArrayX11EventsListener *>(p)->getEvent();
+    return create(property);
 }
 
 }

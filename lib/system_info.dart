@@ -1,6 +1,18 @@
 import 'dart:io';
 
-import 'CAPI.dart';
+import 'package:flutter/widgets.dart';
+
+@immutable
+class MemInfo {
+  final int totalRam;
+  final int freeRam;
+  final int availableRam;
+
+  MemInfo(
+      {@required this.totalRam,
+        @required this.freeRam,
+        @required this.availableRam});
+}
 
 MemInfo getMemoryInfo() {
   final memInfo = File("/proc/meminfo");

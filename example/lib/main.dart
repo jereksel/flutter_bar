@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_bar_plugin/CAPI.dart';
+import 'package:flutter_bar_plugin/X11Properties.dart';
 import 'package:flutter_bar_plugin/X11.dart';
 import 'package:flutter_bar_plugin/bar_settings.dart';
 import 'package:flutter_bar_plugin/flutter_bar_plugin.dart';
@@ -15,6 +15,8 @@ import 'widgets/desktop_names.dart';
 import 'widgets/mem_info.dart';
 import 'widgets/monitor_list.dart';
 import 'widgets/position_list.dart';
+import 'widgets/visible_desktop_names.dart';
+import 'widgets/workspace.dart';
 
 final getIt = GetIt.instance;
 
@@ -69,8 +71,7 @@ class MyApp extends StatelessWidget {
                       fontSize: 86.0,
                       color: Colors.red,
                       fontFamily: "abc")),
-              CurrentDesktopWidget(),
-              DesktopNamesWidget(),
+              WorkspaceWidget(),
             ],
           ),
         ),

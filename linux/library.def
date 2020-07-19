@@ -1,5 +1,8 @@
 LIBRARY   libflutter_bar_plugin_plugin
 EXPORTS
-   hello_world
-   create_current_desktop_listener
-   get_current_desktop
+   create_cardinal_property_listener
+   get_cardinal_property
+   create_string_list_property_listener
+   get_string_list_property
+   create_integer_list_property_listener
+   get_integer_list_property
