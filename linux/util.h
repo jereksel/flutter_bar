@@ -1,6 +1,7 @@
 #ifndef RUNNER_UTIL_H
 #define RUNNER_UTIL_H
 
+#include <xcb/xcb.h>
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -19,5 +20,8 @@ struct list_of_ints {
 
 list_of_strings* create(const std::vector<std::string>& vec);
 list_of_ints* create(const std::vector<uint32_t>& vec);
+
+xcb_atom_t intern_atom(xcb_connection_t *conn, const char *atom);
+std::vector<std::string> splitString(const std::string &str, char separator);
 
 #endif //RUNNER_UTIL_H

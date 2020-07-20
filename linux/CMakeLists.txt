@@ -9,11 +9,17 @@ include_directories(${X11_X11_INCLUDE_PATH})
 
 add_library(${PLUGIN_NAME} SHARED
   "${PLUGIN_NAME}.cc"
+  library.def
   gtk_bridge.cpp
-  dart_ffi.cpp
   x11_events.cpp
   util.cpp
-  library.def)
+  dart_ffi_entrypoint.cpp
+  x11/events_listener/abstract_listener.cpp
+  x11/events_listener/string_array.cpp
+  x11/events_listener/int_array.cpp
+  x11/events_listener/cardinal.cpp
+
+  x11/workspaces_with_windows.cpp)
 
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES

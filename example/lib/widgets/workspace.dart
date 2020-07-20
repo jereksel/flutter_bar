@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bar_plugin/X11.dart';
+import 'package:flutter_bar_plugin/X11Properties.dart';
 import 'package:flutter_bar_plugin_example/widgets/simple_stream_builder.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
@@ -10,27 +11,36 @@ class _DesktopStatus {
   final List<String> desktopNames;
   final int currentDesktop;
   final List<int> visibleDesktops;
+  final List<int> desktopsWithWindows;
 
-  _DesktopStatus(this.desktopNames, this.currentDesktop, this.visibleDesktops);
+  _DesktopStatus(this.desktopNames, this.currentDesktop, this.visibleDesktops,
+      this.desktopsWithWindows);
 }
 
 class WorkspaceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final stream = Rx.combineLatest4(
-        prepareDesktopNamesListener(),
-        prepareCurrentDesktopListener(),
-        getVisibleDesktops(),
-        getNumberOfDesktops(),
-        (a, b, c, d) =>
-            new Tuple4<List<String>, int, List<int>, int>(a, b, c, d)).map(
-        (event) => _DesktopStatus(
-            event.item1.take(event.item4).toList(), event.item2, event.item3));
+    final workspacesWithWindowsStream =
+        Stream.periodic(Duration(milliseconds: 250))
+            .map((event) => getWorkspacesWithWindows());
+
+    final allWorkspaces = Rx.combineLatest2(prepareDesktopNamesListener(),
+        getNumberOfDesktops(), (a, b) => a.take(b).toList());
+
+    final currentDesktop = prepareCurrentDesktopListener();
+
+    final visibleDesktops = getVisibleDesktops();
+
+    final combined = Rx.combineLatest4(
+        allWorkspaces,
+        currentDesktop,
+        visibleDesktops,
+        workspacesWithWindowsStream,
+        (a, b, c, d) => _DesktopStatus(a, b, c, d));
 
     return SimpleStreamBuilder(
-      stream: stream,
+      stream: combined,
       builder: (_DesktopStatus data) {
-
         final allDesktops = data.desktopNames;
         final widgets = <Widget>[];
 
@@ -40,12 +50,19 @@ class WorkspaceWidget extends StatelessWidget {
             textStyle = TextStyle(color: Colors.red);
           }
 
-          widgets.add(Text("[${allDesktops[visibleDesktop]}]", style: textStyle));
+          widgets
+              .add(Text("[${allDesktops[visibleDesktop]}]", style: textStyle));
+        }
+
+        for (int i = 0; i < data.desktopNames.length; i++) {
+          if (data.visibleDesktops.contains(i)) continue;
+          if (!data.desktopsWithWindows.contains(i)) continue;
+
+          widgets.add(Text("${allDesktops[i]}"));
 
         }
 
         return Row(children: widgets);
-
       },
     );
   }

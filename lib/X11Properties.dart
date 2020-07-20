@@ -1,6 +1,7 @@
 import 'dart:ffi' as ffi;
 
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
@@ -9,6 +10,16 @@ class _ListOfStrings extends ffi.Struct {
   int length;
 
   Pointer<Pointer<Utf8>> data;
+
+  List<String> toList() {
+    final list = <String>[];
+    for (int i = 0; i < length; i++) {
+      final charPtrPtr = data.elementAt(i);
+      list.add(Utf8.fromUtf8(charPtrPtr.value));
+    }
+    return list;
+  }
+
 }
 
 class _ListOfIntegers extends ffi.Struct {
@@ -16,6 +27,16 @@ class _ListOfIntegers extends ffi.Struct {
   int length;
 
   Pointer<ffi.Uint32> data;
+
+  List<int> toList() {
+    final list = <int>[];
+    for (int i = 0; i < length; i++) {
+      final intPtr = data.elementAt(i);
+      list.add(intPtr.value);
+    }
+    return list;
+  }
+
 }
 
 const FLUTTERBAR_VISIBLE_WORKSPACES = "_FLUTTERBAR_VISIBLE_WORKSPACES";
@@ -35,7 +56,15 @@ typedef _get_integer_list_property_func = Pointer<_ListOfIntegers> Function(
 typedef _GetIntegerListProperty = Pointer<_ListOfIntegers> Function(
     ffi.Pointer);
 
-final _dylib = ffi.DynamicLibrary.open('libflutter_bar_plugin_plugin.so');
+ffi.DynamicLibrary _getLibrary() {
+  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    return ffi.DynamicLibrary.open("example/build/linux/debug/plugins/flutter_bar_plugin/libflutter_bar_plugin_plugin.so");
+  } else {
+    return ffi.DynamicLibrary.open('libflutter_bar_plugin_plugin.so');
+  }
+}
+
+final ffi.DynamicLibrary _dylib = _getLibrary();
 
 final _Constructor cardinalPropertyListenerConstructor = _dylib
     .lookup<ffi.NativeFunction<_constructor_func>>(
@@ -67,6 +96,11 @@ final _GetIntegerListProperty _getIntegerListProperty = _dylib
         'get_integer_list_property')
     .asFunction();
 
+final ffi.Pointer<_ListOfIntegers> Function() _getWorkspacesWithWindows = _dylib
+    .lookup<ffi.NativeFunction<Pointer<_ListOfIntegers> Function()>>(
+        'get_workspaces_with_windows')
+    .asFunction();
+
 abstract class PropertyListener<T> {
   T getPropertyValue();
 }
@@ -93,12 +127,7 @@ class StringArrayPropertyListener extends PropertyListener<List<String>> {
 
   List<String> getPropertyValue() {
     final struct = _getStringListProperty(_instance);
-    final list = <String>[];
-    for (int i = 0; i < struct.ref.length; i++) {
-      final charPtrPtr = struct.ref.data.elementAt(i);
-      list.add(Utf8.fromUtf8(charPtrPtr.value));
-    }
-    return list;
+    return struct.ref.toList();
   }
 
   factory StringArrayPropertyListener(String atomName) {
@@ -115,12 +144,7 @@ class IntegerArrayPropertyListener extends PropertyListener<List<int>> {
 
   List<int> getPropertyValue() {
     final struct = _getIntegerListProperty(_instance);
-    final list = <int>[];
-    for (int i = 0; i < struct.ref.length; i++) {
-      final intPtr = struct.ref.data.elementAt(i);
-      list.add(intPtr.value);
-    }
-    return list;
+    return struct.ref.toList();
   }
 
   factory IntegerArrayPropertyListener(String atomName) {
@@ -128,4 +152,9 @@ class IntegerArrayPropertyListener extends PropertyListener<List<int>> {
         integerListPropertyListenerConstructor(Utf8.toUtf8(atomName));
     return IntegerArrayPropertyListener._(instance);
   }
+}
+
+List<int> getWorkspacesWithWindows() {
+  final struct = _getWorkspacesWithWindows();
+  return struct.ref.toList();
 }
