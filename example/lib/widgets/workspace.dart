@@ -4,7 +4,6 @@ import 'package:flutter_bar_plugin/X11.dart';
 import 'package:flutter_bar_plugin/X11Properties.dart';
 import 'package:flutter_bar_plugin_example/widgets/simple_stream_builder.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
 
 @immutable
 class _DesktopStatus {
@@ -59,10 +58,9 @@ class WorkspaceWidget extends StatelessWidget {
           if (!data.desktopsWithWindows.contains(i)) continue;
 
           widgets.add(Text("${allDesktops[i]}"));
-
         }
 
-        return Row(children: widgets);
+        return Wrap(children: widgets,spacing: 8.0);
       },
     );
   }

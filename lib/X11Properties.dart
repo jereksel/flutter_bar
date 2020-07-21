@@ -20,6 +20,13 @@ class _ListOfStrings extends ffi.Struct {
     return list;
   }
 
+  destroy() {
+    for (int i = 0; i < length; i++) {
+      free(data[i]);
+    }
+    free(data);
+  }
+
 }
 
 class _ListOfIntegers extends ffi.Struct {
@@ -35,6 +42,10 @@ class _ListOfIntegers extends ffi.Struct {
       list.add(intPtr.value);
     }
     return list;
+  }
+
+  void destroy() {
+    free(data);
   }
 
 }
@@ -127,7 +138,10 @@ class StringArrayPropertyListener extends PropertyListener<List<String>> {
 
   List<String> getPropertyValue() {
     final struct = _getStringListProperty(_instance);
-    return struct.ref.toList();
+    final list = struct.ref.toList();
+    struct.ref.destroy();
+    free(struct);
+    return list;
   }
 
   factory StringArrayPropertyListener(String atomName) {
@@ -144,7 +158,10 @@ class IntegerArrayPropertyListener extends PropertyListener<List<int>> {
 
   List<int> getPropertyValue() {
     final struct = _getIntegerListProperty(_instance);
-    return struct.ref.toList();
+    final list = struct.ref.toList();
+    struct.ref.destroy();
+    free(struct);
+    return list;
   }
 
   factory IntegerArrayPropertyListener(String atomName) {
@@ -156,5 +173,8 @@ class IntegerArrayPropertyListener extends PropertyListener<List<int>> {
 
 List<int> getWorkspacesWithWindows() {
   final struct = _getWorkspacesWithWindows();
-  return struct.ref.toList();
+  final list = struct.ref.toList();
+  struct.ref.destroy();
+  free(struct);
+  return list;
 }
