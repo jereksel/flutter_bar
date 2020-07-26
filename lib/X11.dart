@@ -42,7 +42,7 @@ Stream<String> getCurrentWindow() async* {
 
   streamController.onCancel = () => {p.kill()};
 
-  yield* streamController.stream;
+  yield* streamController.stream.distinct();
 }
 
 Stream<List<String>> prepareDesktopNamesListener() {

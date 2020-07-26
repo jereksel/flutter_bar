@@ -31,9 +31,9 @@ class MyApp extends StatelessWidget {
     ];
 
     final colors = [
+      Colors.yellow.shade900,
       Colors.lightBlue,
       Colors.lightGreen,
-      Colors.yellow,
       Colors.redAccent,
       Colors.transparent,
     ];
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
 
     return Row(
       children: [
-        WorkspacePowerlineWidget(nextColor: Colors.lightBlue),
+        WorkspacePowerlineWidget(nextColor: colors.first),
         powerline,
       ],
     );
