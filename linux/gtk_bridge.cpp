@@ -54,9 +54,10 @@ void disable_top_bar_for_window(GtkWindow *window) {
         return;
     }
 
+    gtk_widget_hide(GTK_WIDGET(win1));
     gtk_window_set_type_hint(win1, GDK_WINDOW_TYPE_HINT_DOCK);
     gtk_window_set_decorated(win1, false);
-
+    gtk_widget_show(GTK_WIDGET(win1));
 }
 
 void setup_struts(long x, long y, long width, long height, std::array<unsigned long, 12> struts) {
