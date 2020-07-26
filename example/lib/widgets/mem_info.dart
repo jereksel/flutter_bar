@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bar_plugin/streams.dart';
+import 'package:flutter_bar_plugin/text.dart';
 import 'package:flutter_bar_plugin_example/widgets/simple_stream_builder.dart';
 import 'package:flutter_bar_plugin/system_info.dart' as SystemInfo;
 
@@ -13,7 +14,7 @@ class MemInfoWidget extends StatelessWidget {
     return SimpleStreamBuilder(
       stream: stream,
       builder: (data) {
-        return Text(data.toString());
+        return text("\uf85a $data%");
       },
     );
   }

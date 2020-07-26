@@ -4,31 +4,31 @@ class PartialStrut {
   final int left;
   final int bottom;
 
-  final int top_start_x;
-  final int top_end_x;
+  final int topStartX;
+  final int topEndX;
 
-  final int left_start_y;
-  final int left_end_y;
+  final int leftStartY;
+  final int leftEndY;
 
-  final int right_start_y;
-  final int right_end_y;
+  final int rightStartY;
+  final int rightEndY;
 
-  final int bottom_start_x;
-  final int bottom_end_x;
+  final int bottomStartX;
+  final int bottomEndX;
 
   PartialStrut(
       {this.left = 0,
       this.right = 0,
       this.top = 0,
       this.bottom = 0,
-      this.left_start_y = 0,
-      this.left_end_y = 0,
-      this.right_start_y = 0,
-      this.right_end_y = 0,
-      this.top_start_x = 0,
-      this.top_end_x = 0,
-      this.bottom_start_x = 0,
-      this.bottom_end_x = 0});
+      this.leftStartY = 0,
+      this.leftEndY = 0,
+      this.rightStartY = 0,
+      this.rightEndY = 0,
+      this.topStartX = 0,
+      this.topEndX = 0,
+      this.bottomStartX = 0,
+      this.bottomEndX = 0});
 
   List<int> toStrutArray() {
     return [
@@ -36,14 +36,14 @@ class PartialStrut {
       right,
       top,
       bottom,
-      left_start_y,
-      left_end_y,
-      right_start_y,
-      right_end_y,
-      top_start_x,
-      top_end_x,
-      bottom_start_x,
-      bottom_end_x
+      leftStartY,
+      leftEndY,
+      rightStartY,
+      rightEndY,
+      topStartX,
+      topEndX,
+      bottomStartX,
+      bottomEndX
     ];
   }
 }

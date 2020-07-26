@@ -47,3 +47,17 @@ class Monitor {
       height.hashCode ^
       primary.hashCode;
 }
+
+typedef MonitorPredicate = bool Function(Monitor);
+
+MonitorPredicate any() {
+  return (monitor) => true;
+}
+
+MonitorPredicate primary() {
+  return (monitor) => monitor.primary;
+}
+
+MonitorPredicate byName(String name) {
+  return (monitor) => monitor.name == name;
+}

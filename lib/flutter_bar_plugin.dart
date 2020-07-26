@@ -44,7 +44,7 @@ class FlutterBarPlugin {
         width = monitor.width;
         height = barSize;
         struts = PartialStrut(
-            top: barSize + monitor.y, top_start_x: x, top_end_x: x + width - 1);
+            top: barSize + monitor.y + 4, topStartX: x, topEndX: x + width - 1);
         break;
       case Position.BOTTOM:
         x = monitor.x;
@@ -52,7 +52,7 @@ class FlutterBarPlugin {
         width = monitor.width;
         height = barSize;
         struts = PartialStrut(
-            bottom: barSize, bottom_start_x: x, bottom_end_x: x + width - 1);
+            bottom: barSize + 4, bottomStartX: x, bottomEndX: x + width - 1);
         break;
     }
 
