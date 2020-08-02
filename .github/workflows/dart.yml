@@ -17,5 +17,5 @@ jobs:
       with:	
         channel: 'dev'	
     - run: flutter pub get
-    - run: cd tests_project && flutter build linux
+    - run: cd tests_project && flutter config --enable-linux-desktop && flutter build linux
     - run: flutter test
