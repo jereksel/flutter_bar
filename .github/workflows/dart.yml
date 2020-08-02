@@ -17,5 +17,5 @@ jobs:
       with:	
         channel: 'dev'	
     - run: flutter pub get
-    - run: sudo apt-get install -y ninja-build libgtk-3-dev && cd tests_project && flutter config --enable-linux-desktop && flutter build linux
+    - run: sudo apt-get install -y ninja-build libgtk-3-dev && cd tests_project && flutter config --enable-linux-desktop && flutter build linux --verbose
     - run: flutter test
