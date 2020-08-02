@@ -11,3 +11,4 @@ build/
 cmake-build-*
 generated_*
 ephemeral/
+.vscode

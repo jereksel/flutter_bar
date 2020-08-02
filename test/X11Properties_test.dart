@@ -13,7 +13,7 @@ void main() {
   });
 
   tearDown(() async {
-//    await Process.run("xprop", ["-root", "-remove", propertyName]);
+    await Process.run("xprop", ["-root", "-remove", propertyName]);
   });
 
   test('Get single cardinal', () async {
@@ -47,11 +47,25 @@ void main() {
   });
 
   test("Get list of UTF-8 strings", () async {
-    await Process.run(
-        "python", ["xproperty/xproperty.py", propertyName, "1", "2", "a", "b"]);
+    final process = await _run_xproperty([propertyName, "1", "2", "a", "b"]);
+    final exitCode = await process.exitCode;
+    expect(exitCode, 0);
     final propertyListener = StringArrayPropertyListener(propertyName);
     final propertyValue = propertyListener.getPropertyValue();
 
     expect(propertyValue, equals(["1", "2", "a", "b"]));
   });
+}
+
+Future<ProcessResult> _run_xproperty(args) {
+  return Process.run("python", [_get_xproperty_location()] + args);
+}
+
+String _get_xproperty_location() {
+  final loc1 = "xproperty/xproperty.py";
+  final loc2 = "../$loc1";
+  if (new File(loc1).existsSync()) {
+    return loc1;
+  }
+  return loc2;
 }
