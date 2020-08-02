@@ -42,11 +42,16 @@ Stream<String> getCurrentWindow() async* {
 
   streamController.onCancel = () => {p.kill()};
 
-  yield* streamController.stream;
+  yield* streamController.stream.distinct();
 }
 
 Stream<List<String>> prepareDesktopNamesListener() {
   return getStringListPropertyStream("_NET_DESKTOP_NAMES");
+}
+
+Stream<String> prepareLayoutNamesListener() {
+  return getStringListPropertyStream("_XMONAD_CURRENT_LAYOUT")
+      .map((event) => event.first);
 }
 
 Stream<int> prepareCurrentDesktopListener() {

@@ -3,6 +3,7 @@ import 'package:flutter_bar_plugin/powerline.dart';
 
 import 'package:flutter_bar_plugin/bar.dart';
 
+import 'widgets/current_layout.dart';
 import 'widgets/current_window.dart';
 import 'widgets/date.dart';
 import 'widgets/mem_info.dart';
@@ -24,11 +25,13 @@ class MyApp extends StatelessWidget {
     var widgets = [
       DateWidget(),
       MemInfoWidget(),
+      CurrentLayoutWidget(),
       CurrentWindowWidget(),
       SizedBox.shrink(),
     ];
 
     final colors = [
+      Colors.yellow.shade900,
       Colors.lightBlue,
       Colors.lightGreen,
       Colors.redAccent,
@@ -39,7 +42,7 @@ class MyApp extends StatelessWidget {
 
     return Row(
       children: [
-        WorkspacePowerlineWidget(nextColor: Colors.lightBlue),
+        WorkspacePowerlineWidget(nextColor: colors.first),
         powerline,
       ],
     );

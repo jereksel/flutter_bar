@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bar_plugin/text.dart';
 
 Widget createPowerline(List<Widget> widgets, List<Color> colors) {
@@ -9,6 +10,7 @@ Widget createPowerline(List<Widget> widgets, List<Color> colors) {
   final finalWidgets = <Widget>[];
 
   final powerlineGlyph = '\uE0B0';
+  final sameColorPowerlineGlyph = '\uE0B1';
 
   for (int i = 0; i < length - 1; i++) {
     finalWidgets.addAll([
@@ -16,15 +18,26 @@ Widget createPowerline(List<Widget> widgets, List<Color> colors) {
         child: widgets[i],
         color: colors[i],
       ),
-      Container(
-        color: colors[i + 1],
-        child: text(
-          powerlineGlyph,
-          style: TextStyle(
-            color: colors[i],
+      if (colors[i] != colors[i + 1])
+        Container(
+          color: colors[i + 1],
+          child: text(
+            powerlineGlyph,
+            style: TextStyle(
+              color: colors[i],
+            ),
           ),
-        ),
-      ),
+        )
+      else
+        Container(
+          color: colors[i],
+          child: text(
+            sameColorPowerlineGlyph,
+            style: TextStyle(
+              color: Colors.black87,
+            ),
+          ),
+        )
     ]);
   }
 

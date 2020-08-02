@@ -69,7 +69,13 @@ typedef _GetIntegerListProperty = Pointer<_ListOfIntegers> Function(
 
 ffi.DynamicLibrary _getLibrary() {
   if (Platform.environment.containsKey('FLUTTER_TEST')) {
-    return ffi.DynamicLibrary.open("example/build/linux/debug/plugins/flutter_bar_plugin/libflutter_bar_plugin_plugin.so");
+    final location1 = "tests_project/build/linux/debug/plugins/flutter_bar_plugin/libflutter_bar_plugin_plugin.so";
+    final location2 = "../$location1";
+    if (new File(location1).existsSync()) {
+      return ffi.DynamicLibrary.open(location1);
+    } else {
+      return ffi.DynamicLibrary.open(location2);
+    }
   } else {
     return ffi.DynamicLibrary.open('libflutter_bar_plugin_plugin.so');
   }
